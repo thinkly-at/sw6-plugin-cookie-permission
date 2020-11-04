@@ -33,7 +33,9 @@ export default class McsCookiePermissionPlugin extends Plugin {
 
         // Open offCanvas cookie configuration dialog when preference is not set
         if (!this._isPreferenceSet()) {
-            this.openOffCanvas();
+            this.openOffCanvas(() => {
+                this._selectAllCheckBoxes();
+            });
         }
     }
 
@@ -70,16 +72,7 @@ export default class McsCookiePermissionPlugin extends Plugin {
      * @private
      */
     _handleAcceptAll() {
-
-        const { cookieSelector } = this.options;
-        const offCanvas = this._getOffCanvas();
-
-        // get all cookie checkboxes
-        Array.from(offCanvas.querySelectorAll(cookieSelector)).forEach(checkbox => {
-            // set checked and fire event (will also mark parent as checked)
-            checkbox.checked = true;
-            this._childCheckboxEvent(checkbox);
-        });
+        this._selectAllCheckBoxes();
 
         // save preference
         this._handleSubmit();
@@ -129,4 +122,15 @@ export default class McsCookiePermissionPlugin extends Plugin {
 
     }
 
+    _selectAllCheckBoxes() {
+        const { cookieSelector } = this.options;
+        const offCanvas = this._getOffCanvas();
+
+        // get all cookie checkboxes
+        Array.from(offCanvas.querySelectorAll(cookieSelector)).forEach(checkbox => {
+            // set checked and fire event (will also mark parent as checked)
+            checkbox.checked = true;
+            this._childCheckboxEvent(checkbox);
+        });
+    }
 }
