@@ -35,6 +35,7 @@ export default class McsCookiePermissionPlugin extends Plugin {
         if (!this._isPreferenceSet()) {
             this.openOffCanvas(() => {
                 this._selectAllCheckBoxes();
+                this._saveSettings();
             });
         }
     }
@@ -76,7 +77,6 @@ export default class McsCookiePermissionPlugin extends Plugin {
 
         // save preference
         this._handleSubmit();
-
     }
 
     /**
@@ -132,5 +132,44 @@ export default class McsCookiePermissionPlugin extends Plugin {
             checkbox.checked = true;
             this._childCheckboxEvent(checkbox);
         });
+    }
+
+    _handleSubmit() {
+        this._saveSettings();
+        this.closeOffCanvas();
+        document.$emitter.publish("cookiePopupClosed");
+    }
+
+    _saveSettings() {
+        const activeCookies = this._getCookies('active');
+        const inactiveCookies = this._getCookies('inactive');
+        const { cookiePreference } = this.options;
+
+        const activeCookieNames = [];
+        const inactiveCookieNames = [];
+
+        inactiveCookies.forEach(({ cookie }) => {
+            inactiveCookieNames.push(cookie);
+
+            if (CookieStorage.getItem(cookie)) {
+                CookieStorage.removeItem(cookie);
+            }
+        });
+
+        /**
+         * Cookies without value are passed to the updateListener
+         * ( see "_handleUpdateListener" method )
+         */
+        activeCookies.forEach(({ cookie, value, expiration }) => {
+            activeCookieNames.push(cookie);
+
+            if (cookie && value) {
+                CookieStorage.setItem(cookie, value, expiration);
+            }
+        });
+
+        CookieStorage.setItem(cookiePreference, '1', '30');
+
+        this._handleUpdateListener(activeCookieNames, inactiveCookieNames);
     }
 }
