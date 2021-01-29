@@ -46,7 +46,7 @@ export default class McsCookiePermissionPlugin extends Plugin {
      * @return boolean
      */
     _isPreferenceSet() {
-        return !!CookieStorage.getItem(this.options.cookiePreference);
+        return false;
     }
 
     /**
